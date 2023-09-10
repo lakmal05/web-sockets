@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String          @id @unique
+  first_name String
+  last_name  String
+  username   String          @unique
+  password   String
+  email      String          @unique
+  nic        String          @unique
+  gender     String
+  dob        DateTime
+  country    String
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+  workspaces UserWorkspace[]
+}
+
+model Workspace {
+  workspace_id            String          @id @unique
+  name                    String
+  description             String
+  members                 UserWorkspace[]
+  Collection              Collection?     @relation(fields: [collectionCollection_id], references: [collection_id])
+  collectionCollection_id String?
+}
+
+model UserWorkspace {
+  id           String     @id @unique
+  user_id      String
+  workspace_id String?
+  User         User?      @relation(fields: [userId], references: [id])
+  userId       String?
+  Workspace    Workspace? @relation(fields: [workspace_id], references: [workspace_id])
+
+  role_id String
+  roles   Roles  @relation(fields: [role_id], references: [id])
+}
+
+model Roles {
+  id            String          @id @unique
+  name          String
+  display       String
+  type          RoleType
+  UserWorkspace UserWorkspace[]
+}
+
+enum RoleType {
+  ADMIN
+  MEMBER
+}
+
+model Collection {
+  collection_id   String      @id @unique
+  collection_name String
+  workspace_id    String?
+  workspace       Workspace[]
+  folder          Folder[]
+}
+
+model Folder {
+  folder_id     String      @id @unique
+  folder_name   String
+  Collection    Collection? @relation(fields: [collection_id], references: [collection_id])
+  collection_id String?
+}
